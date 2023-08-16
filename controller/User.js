@@ -15,16 +15,6 @@ export const createUser = async (req, res) => {
   
     try {
       const { name, email, image,about } = req.body;
-  
-      // Check if user with the same email already exists
-      const existingUser = await prisma.user.findUnique({
-        where: { name },
-      });
-  
-      if (existingUser) {
-        return res.status(400).json({ message: 'User with this name already exists' });
-      }
-  
       // Create the new user
       const newUser = await prisma.user.create({
         data: {
@@ -38,6 +28,6 @@ export const createUser = async (req, res) => {
       res.status(201).json({ message: 'User created successfully', user: newUser });
     } catch (error) {
       console.error('Error creating user:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      res.status(500).json({ message: 'Internal server error' });
     }
   };
