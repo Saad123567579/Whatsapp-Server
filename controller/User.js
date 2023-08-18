@@ -7,7 +7,7 @@ export const checkAuth = async (req, res, next) => {
   let email = req.body.email;
   const user = await prisma.user.findUnique({ where: { email } })
   if (!user) return res.status(404).json({ status: false });
-  const token = jwt.sign({ id:user._id }, JWT_SECRET_KEY, {
+  const token = jwt.sign({ id: user.id }, JWT_SECRET_KEY, {
     expiresIn: "24hr",
   });
   res.cookie(String("token"), token, {
@@ -50,7 +50,7 @@ export const createUser = async (req, res) => {
 };
 
 export const Getuser = async (req, res) => {
-
+  
   try {
     const token = req.cookies.token;
     const prisma = getprismaClient();
@@ -61,8 +61,9 @@ export const Getuser = async (req, res) => {
       if (error) {
         return res.status(404).json("Invalid Token");
       }
-      let user = await  prisma.user.findUnique({ where: { "id":info.id } });
-      if(!user) return res.status(404).json("False")
+      console.log(info);
+      let user = await prisma.user.findUnique({ where: { id: info?.id } });
+      if (!user) return res.status(404).json("False")
       return res.status(200).json(user);
     });
   } catch (error) {
