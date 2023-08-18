@@ -50,7 +50,7 @@ export const createUser = async (req, res) => {
 };
 
 export const Getuser = async (req, res) => {
-  
+
   try {
     const token = req.cookies.token;
     const prisma = getprismaClient();
@@ -70,6 +70,54 @@ export const Getuser = async (req, res) => {
     return res.status(500).json("Internal Server Error");
   }
 };
+
+export const Getallusers = async (req, res) => {
+  try {
+    const token = req.cookies.token;
+    const prisma = getprismaClient();
+    const users = await prisma.user.findMany();
+
+    const loggedInUser = token ? await getLoggedInUser(token, prisma) : null;
+
+    const userObj = {};
+
+    for (const user of users) {
+      if (!loggedInUser || loggedInUser.id !== user.id) {
+        const firstLetter = user.name[0].toUpperCase();
+        if (!userObj[firstLetter]) {
+          userObj[firstLetter] = [];
+        }
+        userObj[firstLetter].push(user);
+      }
+    }
+
+    const sortedKeys = Object.keys(userObj).sort();
+
+    const sortedUsersArray = sortedKeys.map((key) => {
+      return {
+        letter: key,
+        entries: userObj[key],
+      };
+    });
+
+    return res.status(200).json(sortedUsersArray);
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json("Internal Server Error");
+  }
+};
+
+async function getLoggedInUser(token, prisma) {
+  return new Promise((resolve, reject) => {
+    jwt.verify(String(token), JWT_SECRET_KEY, async (error, info) => {
+      if (error) {
+        reject(error);
+      }
+      const loggedInUser = await prisma.user.findUnique({ where: { id: info?.id } });
+      resolve(loggedInUser);
+    });
+  });
+}
 
 
 
