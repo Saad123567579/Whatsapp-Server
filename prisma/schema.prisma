@@ -13,20 +13,18 @@ model User {
   email            String     @unique
   image            String?
   about            String?
-  sentMessages     Messages[] @relation("sentMessages")
-  receivedMessages Messages[] @relation("receivedMessages")
+  sentMessages     Message[]  @relation("userSentMessages")
+  receivedMessages Message[]  @relation("userReceivedMessages")
 }
 
-model Messages {
+model Message {
   id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  sender     User     @relation("sentMessages", fields: [senderId], references: [id])
+  sender     User     @relation("userSentMessages", fields: [senderId], references: [id])
   senderId   String   @db.ObjectId
-  receiver   User     @relation("receivedMessages", fields: [receiverId], references: [id])
+  receiver   User     @relation("userReceivedMessages", fields: [receiverId], references: [id])
   receiverId String   @db.ObjectId
   type       String   @default("text")
   message    String
   status     String   @default("sent")
   createdAt  DateTime @default(now())
-
-
 }
