@@ -61,7 +61,7 @@ export const Getuser = async (req, res) => {
       if (error) {
         return res.status(404).json("Invalid Token");
       }
-      console.log(info);
+     
       let user = await prisma.user.findUnique({ where: { id: info?.id } });
       if (!user) return res.status(404).json("False")
       return res.status(200).json(user);
