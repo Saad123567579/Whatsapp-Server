@@ -62,6 +62,13 @@ io.on("connection",(socket)=>{
             io.to(onlineUsers.get(to)).emit("herecurrentusers",Array.from(onlineUsers.keys()))
         }, 2000);
     })
+    socket.on("send-msg",(obj)=>{
+        const {senderId,receiverId} = obj;
+        if(senderId && receiverId){
+            io.to(onlineUsers.get(senderId)).emit("receive-msg",obj);
+            io.to(onlineUsers.get(receiverId)).emit("receive-msg",obj);
+        }
+    })
    
     
 
