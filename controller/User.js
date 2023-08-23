@@ -119,19 +119,13 @@ async function getLoggedInUser(token, prisma) {
   });
 }
 
+export const Logout = async (req, res) => {
+  try {
+    res.clearCookie("token");
 
-
-
-
-
-
-// export const Logout = async (req, res) => {
-//   try {
-//     res.clearCookie("token");
-
-//     return res.status(200).json('Successfully logged out');
-//   } catch (e) {
-//     console.log(e);
-//     return res.status(500).json("Internal Server Error")
-//   }
-// }
+    return res.status(200).json('Successfully logged out');
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json("Internal Server Error")
+  }
+}

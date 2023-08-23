@@ -1,7 +1,7 @@
 import getprismaClient from "../client/prismaClient.js";
 
 export const addMessage = async (req, res) => {
-  // try {
+  try {
     const prisma = getprismaClient();
     const { message, from, to } = req.body;
 
@@ -23,14 +23,14 @@ export const addMessage = async (req, res) => {
     } else {
       return res.status(400).json("Invalid data");
     }
-  // } catch (e) {
+  } catch (e) {
     
-  //   return res.status(500).json("Internal Server Error");
-  // }
+    return res.status(500).json("Internal Server Error");
+  }
 }
 
 export const getMessages = async(req,res) => {
-  // try{
+  try{
     const prisma = getprismaClient();
     const {from,to} = req.params;
     const messages = await prisma.message.findMany({
@@ -46,7 +46,8 @@ export const getMessages = async(req,res) => {
           }
         ]
       },
-      orderBy:{id:"asc"}
+      orderBy:{id:"asc"},
+      
     })
     if(!messages) return res.status(404).json("Empty");
     const unreadMessages = [];
@@ -63,7 +64,57 @@ export const getMessages = async(req,res) => {
     })
     return res.status(200).json(messages);
 
-  // } catch(e) {
-  //   return res.status(500).json("Internal Server Error");
-  // }
+  } catch(e) {
+    return res.status(500).json("Internal Server Error");
+  }
 }
+
+
+export const getmyMessages = async (req, res) => {
+  try {
+    const prisma = getprismaClient();
+    const { from } = req.params;
+    const myId = from;
+    const messages = await prisma.message.findMany({
+      where: {
+        OR: [
+          {
+            senderId: from,
+          },
+          {
+            receiverId: from,
+          },
+        ],
+      },
+      orderBy: { createdAt: "desc" },
+      include: { sender: true, receiver: true },
+    });
+    
+    if (!messages) return res.status(404).json("Empty");
+    const referance = []
+    const obj = [];
+    
+   messages.map((message)=>{
+    if(message.receiverId === myId){
+      let otherUserid = message.senderId;
+      if(!referance.includes(otherUserid)){
+        obj.push(message);
+        referance.push(otherUserid);
+      }
+    }
+    if(message.senderId === myId){
+      let otherUserid = message.receiverId;
+      if(!referance.includes(otherUserid)){
+        obj.push(message);
+        referance.push(otherUserid);
+      }
+    }
+   })
+
+    return res.status(200).json(obj);
+
+  } catch (e) {
+    return res.status(500).json("Internal Server Error");
+  }
+};
+
